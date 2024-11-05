@@ -1,7 +1,8 @@
 const mongoose = require('mongoose')
 const databaseUrl =
-  process.env.DATABASE_URL || 'mongodb://127.0.0.1:27017/argentBankDB'
-
+process.env.DATABASE_URL || 'mongodb://localhost/argentBankDB'
+console.log(databaseUrl)
+console.log(process.env.DATABASE_URL)
 module.exports = async () => {
   try {
     await mongoose.connect(databaseUrl, { useNewUrlParser: true })
