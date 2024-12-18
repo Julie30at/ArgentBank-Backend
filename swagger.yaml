@@ -65,8 +65,6 @@ paths:
         - User Module
       summary: User Profile API
       description: API for fetching a user profile
-      #produces:
-       # - application/json
       responses:
         '200':
           description: User profile retrieved successfully
@@ -74,6 +72,8 @@ paths:
             $ref: '#/definitions/ApiResponse'
         '400':
           description: Invalid Fields
+        '401':
+          description: Unauthorized
         '500':
           description: Internal Server Error
     put:
@@ -99,71 +99,35 @@ paths:
             $ref: '#/definitions/ApiResponse'
         '400':
           description: Invalid Fields
+        '401':
+          description: Unauthorized
         '500':
           description: Internal Server Error
-  /accounts:
-    get:
-      tags:
-        - Accounts
-      summary: Get all bank accounts
-      description: Retrieve all accounts for the authenticated user
-      security:
-        - Bearer: []
-      responses:
-        "200":
-          description: List of accounts retrieved successfully
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Account'
-        "500":
-          description: Internal Server Error
-  /accounts/{accountId}:
-    get:
-      tags:
-        - Accounts
-      summary: Get account details
-      description: Retrieve details of a specific account by ID
-      parameters:
-        - name: accountId
-          in: path
-          required: true
-          schema:
-            type: string
-      security:
-        - Bearer: []
-      responses:
-        "200":
-          description: Account details retrieved successfully
-          schema:
-            $ref: '#/definitions/Account'
-        "404":
-          description: Account not found
-        "500":
-          description: Internal Server Error
-  /accounts/{accountId}/transactions:
+  /transactions:
     get:
       tags:
         - Transactions
-      summary: Get transactions for an account
-      description: Retrieve all transactions for a specific account
-      parameters:
-        - name: accountId
-          in: path
-          required: true
-          schema:
-            type: string
+      summary: Get transactions for the current month
+      description: Retrieve all transactions from all accounts for the current month
       security:
         - Bearer: []
+      parameters:
+        - name: month
+          in: query
+          required: true
+          type: string
+          description: Month in the format YYYY-MM
       responses:
         "200":
           description: Transactions retrieved successfully
           schema:
             type: array
             items:
-              $ref: '#/definitions/Transaction'
-        "404":
-          description: Account not found
+              $ref: '#/definitions/Transactions'
+        "400":
+          description: Invalid Month Format
+        "401":
+          description: Unauthorized
         "500":
           description: Internal Server Error
   /transactions/{transactionId}:
@@ -178,23 +142,24 @@ paths:
         - name: transactionId
           in: path
           required: true
-          schema:
-            type: string
+          type: string
         - in: body
           name: body
           description: Update transaction payload
           required: true
           schema:
-            $ref: '#/definitions/TransactionUpdate'
+            $ref: '#/definitions/TransactionsUpdate'
       responses:
         "200":
           description: Transaction updated successfully
           schema:
-            $ref: '#/definitions/Transaction'
+            $ref: '#/definitions/Transactions'
         "404":
           description: Transaction not found
         "400":
           description: Invalid data
+        "401":
+          description: Unauthorized
         "500":
           description: Internal Server Error
 securityDefinitions:
@@ -252,22 +217,7 @@ definitions:
     properties:
       userName:
         type: string
-  Account:
-    type: object
-    properties:
-      id:
-        type: string
-      accountName:
-        type: string
-      accountType:
-        type: string
-        enum:
-          - Checking
-          - Saving
-          - CreditCard
-      balance:
-        type: number
-  Transaction:
+  Transactions:
     type: object
     properties:
       transactionId:
@@ -296,7 +246,7 @@ definitions:
           - Other
       comment:
         type: string
-  TransactionUpdate:
+  TransactionsUpdate:
     type: object
     properties:
       category:
